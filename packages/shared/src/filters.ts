@@ -1,0 +1,107 @@
+import { z } from "zod";
+import { LISTING_TYPES, PROPERTY_TYPES, SORT_OPTIONS } from "./domain";
+
+/**
+ * Canonical search filters. Used by:
+ *  - the web/mobile search UIs (URL <-> filters)
+ *  - the `ai-search` edge function (LLM output is validated against this schema)
+ *  - the `search_properties` / `properties_in_bbox` RPCs (passed as jsonb)
+ */
+export const propertyFiltersSchema = z
+  .object({
+    listing_type: z.enum(LISTING_TYPES).optional(),
+    property_types: z.array(z.enum(PROPERTY_TYPES)).max(8).optional(),
+    city: z.string().max(80).optional(),
+    district: z.string().max(80).optional(),
+    q: z.string().max(200).optional(),
+    price_min: z.number().int().nonnegative().optional(),
+    price_max: z.number().int().positive().optional(),
+    area_min: z.number().nonnegative().optional(),
+    area_max: z.number().positive().optional(),
+    bedrooms_min: z.number().int().min(0).max(20).optional(),
+    bathrooms_min: z.number().int().min(0).max(20).optional(),
+    parking: z.boolean().optional(),
+    pool: z.boolean().optional(),
+    garden: z.boolean().optional(),
+    furnished: z.boolean().optional(),
+    has_360: z.boolean().optional(),
+    has_3d: z.boolean().optional(),
+    verified: z.boolean().optional(),
+    sort: z.enum(SORT_OPTIONS).optional(),
+  })
+  .strict();
+
+export type PropertyFilters = z.infer<typeof propertyFiltersSchema>;
+
+const BOOL_KEYS = ["parking", "pool", "garden", "furnished", "has_360", "has_3d", "verified"] as const;
+const INT_KEYS = ["price_min", "price_max", "bedrooms_min", "bathrooms_min"] as const;
+const NUM_KEYS = ["area_min", "area_max"] as const;
+const STR_KEYS = ["listing_type", "city", "district", "q", "sort"] as const;
+
+/** Parse URLSearchParams (or a Next.js searchParams record) into validated filters. Invalid values are dropped. */
+export function filtersFromSearchParams(
+  params: URLSearchParams | Record<string, string | string[] | undefined>,
+): PropertyFilters {
+  const get = (k: string): string | undefined => {
+    if (params instanceof URLSearchParams) return params.get(k) ?? undefined;
+    const v = params[k];
+    return Array.isArray(v) ? v[0] : v;
+  };
+  const raw: Record<string, unknown> = {};
+  for (const k of STR_KEYS) {
+    const v = get(k);
+    if (v) raw[k] = v;
+  }
+  for (const k of INT_KEYS) {
+    const v = get(k);
+    if (v && /^\d+$/.test(v)) raw[k] = Number(v);
+  }
+  for (const k of NUM_KEYS) {
+    const v = get(k);
+    if (v && !Number.isNaN(Number(v))) raw[k] = Number(v);
+  }
+  for (const k of BOOL_KEYS) {
+    const v = get(k);
+    if (v === "1" || v === "true") raw[k] = true;
+  }
+  const types = get("type");
+  if (types) raw.property_types = types.split(",").filter(Boolean);
+
+  // Validate key by key so that one bad value does not discard the rest.
+  const out: Record<string, unknown> = {};
+  const shape = propertyFiltersSchema.shape;
+  for (const [k, v] of Object.entries(raw)) {
+    const field = shape[k as keyof typeof shape];
+    const parsed = field?.safeParse(v);
+    if (parsed?.success) out[k] = parsed.data;
+  }
+  return out as PropertyFilters;
+}
+
+/** Serialize filters into URL search params (inverse of filtersFromSearchParams). */
+export function filtersToSearchParams(filters: PropertyFilters): URLSearchParams {
+  const sp = new URLSearchParams();
+  for (const [k, v] of Object.entries(filters)) {
+    if (v === undefined || v === null || v === "" || v === false) continue;
+    if (k === "property_types") {
+      if ((v as string[]).length) sp.set("type", (v as string[]).join(","));
+    } else if (typeof v === "boolean") {
+      sp.set(k, "1");
+    } else {
+      sp.set(k, String(v));
+    }
+  }
+  return sp;
+}
+
+/** Number of active filters, excluding sort and the listing type tab. */
+export function countActiveFilters(filters: PropertyFilters): number {
+  return Object.entries(filters).filter(
+    ([k, v]) =>
+      k !== "sort" &&
+      k !== "listing_type" &&
+      v !== undefined &&
+      v !== false &&
+      !(Array.isArray(v) && v.length === 0),
+  ).length;
+}

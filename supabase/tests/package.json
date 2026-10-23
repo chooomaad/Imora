@@ -1,0 +1,14 @@
+{
+  "name": "imora-db-tests",
+  "private": true,
+  "type": "module",
+  "description": "Applies all migrations + seed on PGlite (Postgres WASM) with a Supabase auth/storage stub and exercises the RPCs and RLS.",
+  "scripts": {
+    "test": "node smoke.mjs ../.."
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.8",
+    "@electric-sql/pglite-pgvector": "0.0.9",
+    "@electric-sql/pglite-postgis": "0.2.8"
+  }
+}

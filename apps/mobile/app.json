@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "Imora",
+    "slug": "imora",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "mr.imora.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Imora utilise votre position pour afficher les biens autour de vous.",
+        "NSMotionUsageDescription": "Imora utilise les capteurs de mouvement pour la visite 360°."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#111110",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "mr.imora.app",
+      "permissions": [
+        "ACCESS_FINE_LOCATION"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-status-bar",
+      "expo-secure-store",
+      "expo-image",
+      "expo-localization",
+      "expo-font",
+      "expo-notifications"
+    ],
+    "scheme": "imora",
+    "extra": {
+      "supportsRTL": true
+    },
+    "experiments": {
+      "typedRoutes": false
+    }
+  }
+}

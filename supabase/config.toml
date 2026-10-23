@@ -1,0 +1,20 @@
+# Minimal Supabase CLI config for Imora. Run `supabase link --project-ref <ref>` then `supabase db push`.
+project_id = "imora"
+
+[db]
+major_version = 17
+
+[db.seed]
+enabled = true
+sql_paths = ["./seed.sql"]
+
+[auth]
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["http://localhost:3000/auth/callback", "imora://"]
+
+# Called by a Database Webhook / cron with a shared secret, not by end users
+[functions.notify-push]
+verify_jwt = false
+
+[functions.embed-properties]
+verify_jwt = false

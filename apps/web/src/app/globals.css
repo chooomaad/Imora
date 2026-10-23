@@ -1,0 +1,187 @@
+@import "tailwindcss";
+
+/* Dark mode is class-driven (html.dark), set from the user's choice or system preference. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* -------------------------------------------------------------------------
+   Imora design tokens — references: cream / deep black / gold-sand.
+   ------------------------------------------------------------------------- */
+:root {
+  --bg: #faf8f4;
+  --surface: #ffffff;
+  --surface-2: #f4efe7;
+  --surface-3: #ece5d9;
+  --ink: #111110;
+  --ink-2: #2b2925;
+  --muted: #706858;
+  --subtle: #a39a8a;
+  --line: #ebe4d8;
+  --gold: #7d5f14;
+  --gold-strong: #6a500f;
+  --gold-bright: #c9a246;
+  --gold-light: #f6dc98;
+  --gold-soft: #f8f0dc;
+  --green: #1d4a37;
+  --green-soft: #e6efe9;
+  --danger: #b4321f;
+  --danger-soft: #fbe9e5;
+  --on-ink: #ffffff;
+  --shadow-color: 60 45 15;
+  color-scheme: light;
+}
+
+.dark {
+  --bg: #0d0c0a;
+  --surface: #171512;
+  --surface-2: #201d19;
+  --surface-3: #2a2621;
+  --ink: #f4efe6;
+  --ink-2: #ddd6ca;
+  --muted: #a69d8e;
+  --subtle: #776f63;
+  --line: #2d2924;
+  --gold: #d7b35f;
+  --gold-strong: #e6c47a;
+  --gold-bright: #e8c66d;
+  --gold-light: #3a3020;
+  --gold-soft: #26211a;
+  --green: #7cc0a0;
+  --green-soft: #1b2a23;
+  --danger: #f08a78;
+  --danger-soft: #3a1d18;
+  --on-ink: #0d0c0a;
+  --shadow-color: 0 0 0;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
+  --color-line: var(--line);
+  --color-gold: var(--gold);
+  --color-gold-strong: var(--gold-strong);
+  --color-gold-bright: var(--gold-bright);
+  --color-gold-light: var(--gold-light);
+  --color-gold-soft: var(--gold-soft);
+  --color-green: var(--green);
+  --color-green-soft: var(--green-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-on-ink: var(--on-ink);
+
+  --font-sans: var(--font-body), var(--font-arabic), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-serif), var(--font-arabic), ui-serif, Georgia, serif;
+  --font-arabic: var(--font-arabic);
+
+  --radius-card: 1.25rem;
+  --radius-xl2: 1.75rem;
+
+  --shadow-soft: 0 1px 2px rgb(var(--shadow-color) / 0.04), 0 8px 24px -12px rgb(var(--shadow-color) / 0.12);
+  --shadow-lift: 0 2px 4px rgb(var(--shadow-color) / 0.05), 0 18px 40px -18px rgb(var(--shadow-color) / 0.28);
+  --shadow-pin: 0 2px 10px rgb(0 0 0 / 0.16);
+
+  --animate-fade-up: fade-up 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  --animate-sheet-up: sheet-up 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-shimmer: shimmer 1.4s linear infinite;
+  --animate-pulse-ring: pulse-ring 2s ease-out infinite;
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes sheet-up {
+  from { transform: translateY(100%); }
+  to { transform: none; }
+}
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to { background-position: 200% 0; }
+}
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--gold-bright) 45%, transparent); }
+  100% { box-shadow: 0 0 0 18px transparent; }
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
+  text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Arabic: switch the whole UI to the Arabic face, keep Latin digits for prices */
+html[lang="ar"] body {
+  font-family: var(--font-arabic), var(--font-body), system-ui, sans-serif;
+}
+html[lang="ar"] .font-display {
+  font-family: var(--font-arabic), var(--font-serif), serif;
+  font-weight: 600;
+}
+
+@layer utilities {
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  .skeleton {
+    background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-3) 50%, var(--surface-2) 75%);
+    background-size: 200% 100%;
+    animation: var(--animate-shimmer);
+  }
+  .pb-safe {
+    padding-bottom: max(env(safe-area-inset-bottom), 0px);
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+  /* Keep numbers/prices LTR inside RTL text */
+  .ltr-nums {
+    direction: ltr;
+    unicode-bidi: isolate;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold-bright);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* MapLibre tweaks to match the Imora look */
+.maplibregl-ctrl-attrib {
+  font-size: 10px;
+  background: color-mix(in srgb, var(--surface) 80%, transparent) !important;
+}
+.maplibregl-canvas:focus-visible {
+  outline: none;
+}
+
+/* Onboarding motion */
+@keyframes intro-rise {
+  from { opacity: 0; transform: translateY(22px) scale(0.98); filter: blur(4px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+@keyframes chip-pop {
+  from { opacity: 0; transform: scale(0.6) translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
